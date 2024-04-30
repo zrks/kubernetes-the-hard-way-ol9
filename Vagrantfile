@@ -6,12 +6,25 @@ BANDMASTER_VM_NAME = "bandmaster"
 GIT_VM_NAME = "gitlab"
 DNS_VM_NAME = "bind9"
 
+LOADBALANCER_NAME = "loadbalancer"
+
+CONTROLPLANE_1_NAME = "controlplane1"
+CONTROLPLANE_2_NAME = "controlplane2"
+
+WORKER_1_NAME = "worker1"
+WORKER_2_NAME = "worker2"
+
 # N.B.
 # https://www.virtualbox.org/manual/ch06.html#network_hostonly
 IP_NW = "10.0.0."
 BANDMASTER_HOST = "10"
 GIT_HOST = "20"
 DNS_HOST = "30"
+LOADBALANCER_HOST = "40"
+CONTROLPLANE_1_HOST = "41"
+CONTROLPLANE_2_HOST = "42"
+WORKER_1_HOST = "43"
+WORKER_2_HOST = "44"
 
 
 # All Vagrant configuration is done below. The "2" in Vagrant.configure
@@ -65,11 +78,71 @@ Vagrant.configure("2") do |config|
     node.vm.network :private_network, ip: IP_NW + DNS_HOST
   end
 
+  config.vm.define LOADBALANCER_NAME do |node|
+    # TODO:
+    # https://docs.oracle.com/en/operating-systems/oracle-linux/8/network/network-ConfiguringtheNameService.html#ol-namesvc-resource-records
+    node.vm.provider "virtualbox" do |vb|
+      vb.name = LOADBALANCER_NAME
+      node.vm.hostname = LOADBALANCER_NAME
+      vb.memory = 1536
+      vb.cpus = 1
+    end
+    node.vm.network :private_network, ip: IP_NW + LOADBALANCER_HOST
+  end
+
+  config.vm.define CONTROLPLANE_1_NAME do |node|
+    # TODO:
+    # https://docs.oracle.com/en/operating-systems/oracle-linux/8/network/network-ConfiguringtheNameService.html#ol-namesvc-resource-records
+    node.vm.provider "virtualbox" do |vb|
+      vb.name = CONTROLPLANE_1_NAME
+      node.vm.hostname = CONTROLPLANE_1_NAME
+      vb.memory = 1536
+      vb.cpus = 1
+    end
+    node.vm.network :private_network, ip: IP_NW + CONTROLPLANE_1_HOST
+  end
+
+  config.vm.define CONTROLPLANE_2_NAME do |node|
+    # TODO:
+    # https://docs.oracle.com/en/operating-systems/oracle-linux/8/network/network-ConfiguringtheNameService.html#ol-namesvc-resource-records
+    node.vm.provider "virtualbox" do |vb|
+      vb.name = CONTROLPLANE_2_NAME
+      node.vm.hostname = CONTROLPLANE_2_NAME
+      vb.memory = 1536
+      vb.cpus = 1
+    end
+    node.vm.network :private_network, ip: IP_NW + CONTROLPLANE_2_HOST
+  end
+
+  config.vm.define WORKER_1_NAME do |node|
+    # TODO:
+    # https://docs.oracle.com/en/operating-systems/oracle-linux/8/network/network-ConfiguringtheNameService.html#ol-namesvc-resource-records
+    node.vm.provider "virtualbox" do |vb|
+      vb.name = WORKER_1_NAME
+      node.vm.hostname = WORKER_1_NAME
+      vb.memory = 1536
+      vb.cpus = 1
+    end
+    node.vm.network :private_network, ip: IP_NW + WORKER_1_HOST
+  end
+
+  config.vm.define WORKER_2_NAME do |node|
+    # TODO:
+    # https://docs.oracle.com/en/operating-systems/oracle-linux/8/network/network-ConfiguringtheNameService.html#ol-namesvc-resource-records
+    node.vm.provider "virtualbox" do |vb|
+      vb.name = WORKER_2_NAME
+      node.vm.hostname = WORKER_2_NAME
+      vb.memory = 1536
+      vb.cpus = 1
+    end
+    node.vm.network :private_network, ip: IP_NW + WORKER_2_HOST
+  end
+
   config.vm.provision "ansible" do |ansible|
     ansible.playbook = "ansible_provisioning/playbook.yml"
     ansible.extra_vars = {
       #role: "kernel", #"hello_server", #"provision",
-      target: BANDMASTER_VM_NAME+","+GIT_VM_NAME+","+DNS_VM_NAME,
+      target: BANDMASTER_VM_NAME+","+GIT_VM_NAME+","+DNS_VM_NAME+","+LOADBALANCER_NAME+","+CONTROLPLANE_1_NAME+","+CONTROLPLANE_2_NAME+","+WORKER_1_NAME+","+WORKER_2_NAME,
     }
     ansible.verbose = "v"
   end
