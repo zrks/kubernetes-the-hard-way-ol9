@@ -1,0 +1,5 @@
+---
+- name: "Show 'group_names' variable"
+  debug:
+    msg: "{{ group_names }}"
+...

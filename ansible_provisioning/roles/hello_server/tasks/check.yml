@@ -1,0 +1,38 @@
+---
+- name: "Force update tasks"
+  setup:
+
+- name: "Check to see if we are booting with EFI or UEFI"
+  set_fact:
+    booted_with_efi: "{{ ansible_mounts | selectattr('mount', 'match', '^/boot/efi$') | list | length > 0 }}"
+  become: true
+  tags:
+    - always
+
+- name: "Check vars"
+  assert:
+    that:
+      - "kernel is defined or kernel_aarch64 is defined or kernel_x86_64 is defined"
+      - "kernel or kernel_aarch64 or kernel_x86_64"
+    msg: "If you want newer kernel please add it to host vars"
+    quiet: false
+
+- name: Set kernel package for x86 architecture
+  set_fact:
+    kernel_pkg: "{{  kernel_x86_64 }}"
+  when: ansible_architecture == "x86_64"
+
+- debug:
+    var: kernel_pkg
+
+- debug:
+    var: ansible_architecture
+
+- name: "Save /etc/os-release"
+  command: cat os-release chdir=/etc
+  register: os_release_output
+
+- name: "Print /etc/os-release"
+  debug:
+    msg: "{{ os_release_output.stdout_lines }}"
+...

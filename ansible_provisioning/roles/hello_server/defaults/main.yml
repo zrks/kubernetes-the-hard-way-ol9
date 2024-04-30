@@ -1,0 +1,5 @@
+---
+kernel_enabled: True
+kernel: True
+kernel_x86_64: "{{ kernel }}"
+...
