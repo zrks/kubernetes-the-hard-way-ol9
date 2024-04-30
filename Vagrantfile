@@ -25,6 +25,7 @@ CONTROLPLANE_2_HOST = "42"
 WORKER_1_HOST = "43"
 WORKER_2_HOST = "44"
 
+# TODO: Fix so it wont append same entries over and over
 $commonscript = <<-SCRIPT
 sudo echo "10.0.0.10   bandmaster" >> /etc/hosts
 sudo echo "10.0.0.20   gitlab" >> /etc/hosts
@@ -33,6 +34,7 @@ sudo echo "10.0.0.40   loadbalancer" >> /etc/hosts
 sudo echo "10.0.0.41   controlplane1" >> /etc/hosts
 sudo echo "10.0.0.42   controlplane2" >> /etc/hosts
 sudo echo "10.0.0.43   worker1" >> /etc/hosts
+sudo echo "10.0.0.44   worker2" >> /etc/hosts
 SCRIPT
 
 
