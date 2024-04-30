@@ -166,6 +166,7 @@ Vagrant.configure("2") do |config|
     ansible.verbose = "v"
   end
 
+  # Install kubectl on bandmaster
   config.vm.provision "ansible" do |ansible|
     ansible.playbook = "ansible_provisioning/bandmaster_playbook.yml"
     ansible.extra_vars = {
@@ -174,6 +175,15 @@ Vagrant.configure("2") do |config|
     ansible.verbose = "v"
   end
 
+  # install pki
+  # TODO: write script to generate required stuff locally
+  config.vm.provision "ansible" do |ansible|
+    ansible.playbook = "ansible_provisioning/pki_playbook.yml"
+    ansible.extra_vars = {
+      target: BANDMASTER_VM_NAME
+    }
+    ansible.verbose = "v"
+  end
 
   # Disable automatic box update checking. If you disable this, then
   # boxes will only be checked for updates when the user runs

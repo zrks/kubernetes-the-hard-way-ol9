@@ -1,0 +1,16 @@
+---
+# https://docs.ansible.com/ansible/2.9/modules/openssl_certificate_module.html
+
+
+# - openssl_privatekey_info:
+#     path: /etc/ssl/csr/ansible.com.key
+#   register: result_privatekey
+
+- name: Copy file with owner and permissions
+  ansible.builtin.copy:
+    src: test.txt
+    dest: /home/vagrant/yo.txt
+    owner: vagrant
+    group: vagrant
+    mode: '0644'
+...
