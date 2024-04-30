@@ -1,0 +1,11 @@
+---
+- hosts: "{{ target }}"
+  gather_facts: "{{ facts | d(False) }}"
+  serial: "{{ serial | d(0) }}"
+
+  roles:
+    # - "{{ role }}"
+    - kernel
+    - provision
+    - dns
+...

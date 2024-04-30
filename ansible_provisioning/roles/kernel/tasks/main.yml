@@ -1,0 +1,78 @@
+---
+# For reference - https://github.com/mmumshad/kubernetes-the-hard-way/tree/master/vagrant#kernel-settings
+
+- name: "Check file system type"
+  shell:
+    cmd: >
+      stat -fc %T /sys/fs/cgroup/
+  register: fs_type
+
+- name: "Print file system type"
+  debug:
+    msg: "{{ fs_type.stdout }}"
+
+- name: "Set systemd to use cgroups v1 for OracleLinux"
+  shell:
+    cmd: >
+      grubby --update-kernel=ALL --args="systemd.unified_cgroup_hierarchy=0"
+  become: true
+  when:
+    - fs_type.stdout == 'cgroup2fs'
+    # - ansible_distribution == 'OracleLinux'
+
+- name: Check if br_netfilter module is loaded
+  shell:
+    cmd: >
+      lsmod | grep br_netfilter
+  register: br_netfilter_status
+  check_mode: false
+  failed_when: br_netfilter_status.rc not in [0, 1]
+  changed_when: br_netfilter_status.stdout == ""
+
+- name: Load br_netfilter module
+  modprobe:
+    name: br_netfilter
+    state: present
+  become: true
+  when: br_netfilter_status.stdout == ""
+
+- name: Add br_netfilter to /etc/modules-load.d/
+  copy:
+    dest: "/etc/modules-load.d/br_netfilter.conf"
+    content: "br_netfilter"
+    mode: 0644
+  become: true
+  when: br_netfilter_status.stdout == ""
+
+- name: Regenerate initramfs
+  command: dracut --force
+  become: true
+  when: br_netfilter_status.stdout == ""
+
+# kube-proxy needs net.bridge.bridge-nf-call-iptables enabled when found if br_netfilter is not a module
+- name: Check if bridge-nf-call-iptables key exists
+  command: "sysctl net.bridge.bridge-nf-call-iptables"
+  failed_when: false
+  changed_when: false
+  register: sysctl_bridge_nf_call_iptables
+  become: true
+
+- name: Enable bridge-nf-call tables
+  sysctl:
+    name: "{{ item }}"
+    state: present
+    sysctl_file: "{{ sysctl_file_path }}"
+    value: "1"
+    reload: yes
+  when: sysctl_bridge_nf_call_iptables.rc == 0
+  with_items:
+    - net.bridge.bridge-nf-call-iptables
+    - net.bridge.bridge-nf-call-arptables
+    - net.bridge.bridge-nf-call-ip6tables
+    - net.ipv4.ip_forward
+  become: true
+
+
+# - name: Unconditionally reboot the machine with all defaults
+#   ansible.builtin.reboot:
+...

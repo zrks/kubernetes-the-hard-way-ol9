@@ -1,0 +1,13 @@
+---
+- block:
+  - import_tasks: check.yml
+
+
+# - name: "Save /etc/os-release"
+#   command: cat os-release chdir=/etc
+#   register: os_release_output
+
+# - name: "Print /etc/os-release"
+#   debug:
+#     msg: "{{ os_release_output.stdout_lines }}"
+...
