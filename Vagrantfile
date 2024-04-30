@@ -1,7 +1,6 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-NUM_BANDMASTER_NODE_COUNT = 1
 BANDMASTER_VM_NAME = "bandmaster"
 GIT_VM_NAME = "gitlab"
 DNS_VM_NAME = "bind9"
@@ -25,6 +24,16 @@ CONTROLPLANE_1_HOST = "41"
 CONTROLPLANE_2_HOST = "42"
 WORKER_1_HOST = "43"
 WORKER_2_HOST = "44"
+
+$commonscript = <<-SCRIPT
+sudo echo "10.0.0.10   bandmaster" >> /etc/hosts
+sudo echo "10.0.0.20   gitlab" >> /etc/hosts
+sudo echo "10.0.0.30   bind9" >> /etc/hosts
+sudo echo "10.0.0.40   loadbalancer" >> /etc/hosts
+sudo echo "10.0.0.41   controlplane1" >> /etc/hosts
+sudo echo "10.0.0.42   controlplane2" >> /etc/hosts
+sudo echo "10.0.0.43   worker1" >> /etc/hosts
+SCRIPT
 
 
 # All Vagrant configuration is done below. The "2" in Vagrant.configure
@@ -51,7 +60,8 @@ Vagrant.configure("2") do |config|
       vb.cpus = 2
     end
     node.vm.network :private_network, ip: IP_NW + BANDMASTER_HOST
-    # node.vm.network "forwarded_port", guest: 22, host: "#{2810 + i}"
+    node.vm.provision "shell", inline: $commonscript
+    # TODO: Generate ssh key and distribute it to all other machines
   end
 
   config.vm.define GIT_VM_NAME do |node|
@@ -64,6 +74,7 @@ Vagrant.configure("2") do |config|
       vb.cpus = 4
     end
     node.vm.network :private_network, ip: IP_NW + GIT_HOST
+    node.vm.provision "shell", inline: $commonscript
   end
 
   config.vm.define DNS_VM_NAME do |node|
@@ -76,6 +87,7 @@ Vagrant.configure("2") do |config|
       vb.cpus = 1
     end
     node.vm.network :private_network, ip: IP_NW + DNS_HOST
+    node.vm.provision "shell", inline: $commonscript
   end
 
   config.vm.define LOADBALANCER_NAME do |node|
@@ -88,6 +100,7 @@ Vagrant.configure("2") do |config|
       vb.cpus = 1
     end
     node.vm.network :private_network, ip: IP_NW + LOADBALANCER_HOST
+    node.vm.provision "shell", inline: $commonscript
   end
 
   config.vm.define CONTROLPLANE_1_NAME do |node|
@@ -100,6 +113,7 @@ Vagrant.configure("2") do |config|
       vb.cpus = 1
     end
     node.vm.network :private_network, ip: IP_NW + CONTROLPLANE_1_HOST
+    node.vm.provision "shell", inline: $commonscript
   end
 
   config.vm.define CONTROLPLANE_2_NAME do |node|
@@ -112,6 +126,7 @@ Vagrant.configure("2") do |config|
       vb.cpus = 1
     end
     node.vm.network :private_network, ip: IP_NW + CONTROLPLANE_2_HOST
+    node.vm.provision "shell", inline: $commonscript
   end
 
   config.vm.define WORKER_1_NAME do |node|
@@ -124,6 +139,7 @@ Vagrant.configure("2") do |config|
       vb.cpus = 1
     end
     node.vm.network :private_network, ip: IP_NW + WORKER_1_HOST
+    node.vm.provision "shell", inline: $commonscript
   end
 
   config.vm.define WORKER_2_NAME do |node|
@@ -136,6 +152,7 @@ Vagrant.configure("2") do |config|
       vb.cpus = 1
     end
     node.vm.network :private_network, ip: IP_NW + WORKER_2_HOST
+    node.vm.provision "shell", inline: $commonscript
   end
 
   config.vm.provision "ansible" do |ansible|
@@ -143,6 +160,14 @@ Vagrant.configure("2") do |config|
     ansible.extra_vars = {
       #role: "kernel", #"hello_server", #"provision",
       target: BANDMASTER_VM_NAME+","+GIT_VM_NAME+","+DNS_VM_NAME+","+LOADBALANCER_NAME+","+CONTROLPLANE_1_NAME+","+CONTROLPLANE_2_NAME+","+WORKER_1_NAME+","+WORKER_2_NAME,
+    }
+    ansible.verbose = "v"
+  end
+
+  config.vm.provision "ansible" do |ansible|
+    ansible.playbook = "ansible_provisioning/bandmaster_playbook.yml"
+    ansible.extra_vars = {
+      target: BANDMASTER_VM_NAME
     }
     ansible.verbose = "v"
   end
