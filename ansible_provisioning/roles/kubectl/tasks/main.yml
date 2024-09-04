@@ -1,18 +1,26 @@
 ---
+- name: Check if destination file exists
+  stat:
+    path: /usr/local/bin/kubectl
+  register: kubectl_file
+
 - name: Download the latest kubectl release
   uri:
     url: https://dl.k8s.io/release/{{ kubectl_version }}/bin/linux/{{ arch }}/kubectl
     dest: /home/{{ ansible_user }}
   register: kubectl
+  when: not kubectl_file.stat.exists
 
 - name: Download the kubectl checksum file
   uri:
     url: https://dl.k8s.io/{{ kubectl_version }}/bin/linux/{{ arch }}/kubectl.sha256
     dest: /home/{{ ansible_user }}
+  when: not kubectl_file.stat.exists
 
 - name: Validate the kubectl binary against the checksum file
   shell: echo "$(cat kubectl.sha256)  kubectl" | sha256sum --check
   register: result
+  when: not kubectl_file.stat.exists
 
 - name: Assert that the kubectl binary is OK
   vars:
@@ -22,6 +30,7 @@
       - result.stdout == expected
     fail_msg: "{{ result.stdout }}"
     success_msg: "{{ result.stdout }}"
+  when: not kubectl_file.stat.exists
 
 # TODO: Should tolerate existing file
 - name: Move kubectl and change permissions
@@ -33,6 +42,7 @@
     group: root
     mode: "+x"
   become: true
+  when: not kubectl_file.stat.exists
 
 - name: Check if kubectl is installed
   shell: kubectl version --client
