@@ -68,12 +68,4 @@ Vagrant.configure("2") do |config|
     ansible.verbose = "v"
   end
 
-  # Ansible for PKI setup
-  config.vm.provision "ansible" do |ansible|
-    ansible.playbook = "ansible_provisioning/pki_playbook.yml"
-    ansible.extra_vars = {
-      target: "bandmaster," + IP_NW + VM_CONFIG["controlplane1"][:ip] + "," + IP_NW + VM_CONFIG["worker1"][:ip]
-    }
-    ansible.verbose = "v"
-  end
 end

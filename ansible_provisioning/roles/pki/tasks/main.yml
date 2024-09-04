@@ -14,43 +14,4 @@
     group: vagrant
     mode: '0644'
 
-# - name: Clean already existing keys
-#   ansible.builtin.file:
-#     path: "{{ item }}"
-#     state: absent
-#   loop:
-#     - [/tmp/id_ssh_ed25519, /home/vagrant/.ssh/id_ssh_ed25519, /tpm/id_ssh_ed25519.pub, /home/vagrant/.ssh/id_ssh_ed25519.pub]
-
-# - name: Generate an OpenSSH ed25519 keypair
-#   community.crypto.openssh_keypair:
-#     path: /home/vagrant/.ssh/id_ssh_ed25519
-#     type: ed25519
-#     regenerate: always
-#   become: true
-
-# - name: Copy keys
-#   ansible.builtin.file:
-#     src: "{{ item.src }}"
-#     dest: "{{ item.dest }}"
-#     state: file
-#   loop:
-#     - { src: /tmp/id_ssh_ed25519, dest: /home/vagrant/.ssh/id_ssh_ed25519 }
-#     - { src: /tpm/id_ssh_ed25519.pub, dest: /home/vagrant/.ssh/id_ssh_ed25519.pub }
-
-# - name: Copy priv. key to ~/.ssh/
-#   file:
-#     src: /tmp/id_ssh_ed25519
-#     dest: /home/vagrant/.ssh/id_ssh_ed25519
-#     state: hard
-#     owner: root
-#     group: root
-#     mode: "0400"
-
-# - name: Copy pub key to ~/.ssh/
-#   file:
-#     src: /tpm/id_ssh_ed25519.pub
-#     dest: /home/vagrant/.ssh/id_ssh_ed25519.pub
-#     owner: vagrant
-#     group: vagrant
-#     mode: '0400'
 ...

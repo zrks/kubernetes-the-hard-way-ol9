@@ -1,0 +1,9 @@
+[all]
+bandmaster ansible_host=10.0.0.10
+gitlab ansible_host=10.0.0.20
+bind9 ansible_host=10.0.0.30
+loadbalancer ansible_host=10.0.0.40
+controlplane1 ansible_host=10.0.0.41
+controlplane2 ansible_host=10.0.0.42
+worker1 ansible_host=10.0.0.43
+worker2 ansible_host=10.0.0.44
