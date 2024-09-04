@@ -6,12 +6,20 @@
 #     path: /etc/ssl/csr/ansible.com.key
 #   register: result_privatekey
 
-- name: Copy file with owner and permissions
+- name: Copy bandmaster public key
   ansible.builtin.copy:
-    src: test.txt
-    dest: /home/vagrant/yo.txt
+    src: bandmaster.pub
+    dest: /home/vagrant/bandmaster.pub
     owner: vagrant
     group: vagrant
     mode: '0644'
+
+- name: Add public key to authorized_keys
+  authorized_key:
+    user: "{{ ansible_user }}"
+    state: present
+    key: "{{ lookup('file', 'bandmaster.pub') }}"
+    path: /home/{{ ansible_user }}/.ssh/authorized_keys
+    manage_dir: false
 
 ...
